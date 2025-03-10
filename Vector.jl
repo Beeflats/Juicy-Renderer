@@ -76,6 +76,9 @@ function ⟂(v₁::DirectionVector, v₂::DirectionVector)
 	return oproj(v₁, v₂)
 end
 
+const î = DirectionVector(1, 0, 0)
+const ĵ = DirectionVector(0, 1, 0)
+const k̂ = DirectionVector(0, 0, 1)
 
 """ 
 Point structure with operations for 
