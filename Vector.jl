@@ -121,8 +121,8 @@ function transformation_rotateAroundAxis(axis::DirectionVector, θ)
 	of rotating around an axis anticlockwise by an input angle
 	"""
 	u = unit(axis)
-	R = [u.x*u.x*(1-cos(θ)+cos(θ))     u.x*u.y*(1-cos(θ)-u.z*sin(θ)) u.x*u.z*(1-cos(θ)+u.y*sin(θ));
-		 u.y*u.x*(1-cos(θ)+u.z*sin(θ)) u.y*u.y*(1-cos(θ)+cos(θ))     u.y*u.z*(1-cos(θ)-u.x*sin(θ));
-		 u.z*u.x*(1-cos(θ)-u.y*sin(θ)) u.z*u.y*(1-cos(θ)+u.x*sin(θ)) u.z*u.z*(1-cos(θ)+cos(θ))]
+	R = [u.x*u.x*(1-cos(θ))+cos(θ)     u.x*u.y*(1-cos(θ))-u.z*sin(θ) u.x*u.z*(1-cos(θ))+u.y*sin(θ);
+		 u.y*u.x*(1-cos(θ))+u.z*sin(θ) u.y*u.y*(1-cos(θ))+cos(θ)     u.y*u.z*(1-cos(θ))-u.x*sin(θ);
+		 u.z*u.x*(1-cos(θ))-u.y*sin(θ) u.z*u.y*(1-cos(θ))+u.x*sin(θ) u.z*u.z*(1-cos(θ))+cos(θ)]
 	return R
 end
