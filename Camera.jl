@@ -71,7 +71,7 @@ function makeCamera(position::PointVector,
                     imageWidth::Int = 1920, # Image resolutions are typically 1600×900 (HD+), 1920×1080 (Full HD), 2560×1440 (QHD), 3200×1800, 3840×2160 (4K UHD), 5120×2880 (5K), 7680×4320 (8K UHD)
                     sensorWidth = 0.036, # (meters)
                     focalLength = 0.050, # distance of sensor behind camera (meters); wide-angle ranges 10mm to 35mm, standard lenses are 50mm and telephoto lenses are 70mm to 300mm or more 
-                    roll = 0 # anticlockwise rotation (radians)
+                    roll = 0 # anticlockwise rotation (radians); dutch angle
                     ) 
     sensorCenter = displace(position, -focalLength * unit(viewingDirection))
     continuousSensor = PlaneSensor(sensorCenter, viewingDirection)
