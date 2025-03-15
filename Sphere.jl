@@ -17,3 +17,7 @@ function intersects(ray::Ray, sphere::Sphere)
     Δ = b*b - 4*a*c
     return Δ ≥ 0
 end
+
+function ∩(ray::Ray, sphere::Sphere)
+    return intersects(ray, sphere)
+end
