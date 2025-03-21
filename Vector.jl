@@ -79,6 +79,7 @@ end
 const î = DirectionVector(1, 0, 0)
 const ĵ = DirectionVector(0, 1, 0)
 const k̂ = DirectionVector(0, 0, 1)
+const ZEROVECTOR = DirectionVector(0, 0, 0)
 
 """ 
 Point structure with operations for 

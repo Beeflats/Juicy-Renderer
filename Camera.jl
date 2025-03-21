@@ -1,3 +1,5 @@
+include("geometryOperations.jl")
+
 struct PlaneSensor
     """
     The sensor is a plane whose normal from the center passes through the camera eye
