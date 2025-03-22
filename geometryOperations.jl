@@ -1,5 +1,6 @@
-include("Plane.jl")
-include("Sphere.jl")
+include("Scene.jl")
+
+∅ = nothing
 
 function ∈(p::PointVector, r::Ray)
     ε = 0.0001 # tolerance
@@ -132,4 +133,40 @@ function ∩(Π₁::Plane, Π₂::Plane)
         p = displace(m, c*n̄)
         return Ray(p, d)
     end
+end
+
+function ∪(scene₁::Scene, scene₂::Scene)
+    return Scene(union(scene₁.items, scene₂.items))
+end
+
+function ∪(scene::Scene, object::Geometry)
+    return union(scene.items, object)
+end
+
+function ∪(object₁::Geometry, object₂::Geometry)
+    return Scene(Set([object₁, object₂]))    
+end
+
+function ∩(ray::Ray, scene::Scene)
+    """
+    Let 𝕊 be Scene.items and let r(t) = at(ray, t)
+    Let t_hit = min_t({t ∈ ℝ³ | ∃ s ∈ 𝕊: r(t) ∈ s})
+    Returns r(t_hit) and return any s ∈ 𝕊 satisfying r(t_hit) ∈ s
+    """
+    closestObject = ∅
+    closestIntersectionPoint = ∅
+    distanceToClosestIntersection = Inf
+    for object in scene.items
+        intersectionPoint = ray ∩ object
+        if intersectionPoint ≠ ∅
+            distanceFromOrigin = norm( ray.origin → intersectionPoint )
+            if distanceFromOrigin < distanceToClosestIntersection
+                closestObject = object
+                closestIntersectionPoint = intersectionPoint
+                distanceToClosestIntersection = distanceFromOrigin
+            end
+        end
+    end
+    # TODO: rewrite the `for` loop to read with more mathematical notation (set comprehension)
+    return closestObject, closestIntersectionPoint
 end

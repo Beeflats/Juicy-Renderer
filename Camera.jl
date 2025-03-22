@@ -1,4 +1,6 @@
 include("geometryOperations.jl")
+include("Ray.jl")
+include("Scene.jl")
 
 struct PlaneSensor
     """
