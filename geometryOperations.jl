@@ -1,11 +1,14 @@
 include("Scene.jl")
 
 ∅ = nothing
+∞ = Inf
 
 function ∈(p::PointVector, r::Ray)
     ε = 0.0001 # tolerance
     OP = r.origin → p
-    if OP == ZEROVECTOR || abs(∠(OP, ray.direction) - 1) < ε # (O ≡ P) or (|cos(θ)| ≈ 1)
+    if OP == ZEROVECTOR
+        return false
+    elseif abs(∠(OP, ray.direction) - 1) < ε # (O ≡ P) or (|cos(θ)| ≈ 1)
         return true
     else
         return false
@@ -25,7 +28,9 @@ function ∈(p::PointVector, Π::Plane)
     ε = 0.0001 # tolerance
     q = Π.point; n = Π.normal
     QP = q → p
-    if QP == ZEROVECTOR || abs( ∠(QP, n) - π/2 ) < ε # (Q ≡ P) or (QP ∠ n ≈ π/2)
+    if QP == ZEROVECTOR
+        return true
+    elseif abs( ∠(QP, n) - π/2 ) < ε # (Q ≡ P) or (QP ∠ n ≈ π/2)
         return true
     else
         return false
@@ -57,7 +62,7 @@ function ∩(r::Ray, Π::Plane)
     """
     Let O be the origin of the ray, and let d be its direction vector.
     Let P be the point characterising the plane, and n be its normal vector.
-    Let θ = n∠(P→O) and let ϕ = n∠d  
+    Let θ = n∠(P→O) and let ϕ = n∠d
     """
     if r ⊂ Π # ray is contained on the plane
         return r
@@ -67,7 +72,7 @@ function ∩(r::Ray, Π::Plane)
         n = Π.normal
         d = r.direction
         t = (n ⋅ OP) / (n ⋅ d)
-        if t ≥ 0
+        if t > 0
             return at(r, t) # equivalent to displace(O, norm(OP) * cos(θ) / cos(ϕ) * unit(d))
         else # if the ray is pointing away from the plane
             return nothing
@@ -97,7 +102,7 @@ function ∩(ray::Ray, S::Sphere)
         t₁ = ( OC ⋅ d - √(Δ) ) / length²(d) # norm(OC)/norm(d) * (cos(θ) - √[cos²(θ) - cos²(ϕ)])
         t₂ = ( OC ⋅ d - √(Δ) ) / length²(d) # norm(OC)/norm(d) * (cos(θ) + √[cos²(θ) - cos²(ϕ)])
         # note that t₁ == t₂ when θ == ϕ meaning only one solution exists if the ray is tangent to the sphere
-        if t₁ < 0 && t₂ < 0
+        if t₁ ≤ 0 && t₂ ≤ 0
             return nothing
         else
             t = t₁ > 0 ? t₁ : t₂ # set t to be the smaller non-negative value between t₁ and t₂
@@ -147,6 +152,10 @@ function ∪(object₁::Geometry, object₂::Geometry)
     return Scene(Set([object₁, object₂]))    
 end
 
+function ⋃(args::Vararg{Geometry})
+    return Scene(Set(args))
+end
+
 function ∩(ray::Ray, scene::Scene)
     """
     Let 𝕊 be Scene.items and let r(t) = at(ray, t)
@@ -155,7 +164,7 @@ function ∩(ray::Ray, scene::Scene)
     """
     closestObject = ∅
     closestIntersectionPoint = ∅
-    distanceToClosestIntersection = Inf
+    distanceToClosestIntersection = ∞
     for object in scene.items
         intersectionPoint = ray ∩ object
         if intersectionPoint ≠ ∅
