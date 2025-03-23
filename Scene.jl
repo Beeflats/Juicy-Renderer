@@ -1,5 +1,6 @@
 include("Ray.jl")
 include("Vector.jl")
+include("Material.jl")
 
 abstract type Geometry end
 
@@ -30,11 +31,11 @@ end
 
 # TODO: create more geometries e.g. triangles, quadrilaterals, toruses
 
-#struct Object
-#    geometry::Geometry
-#    material::Material # TODO: Create material structure
-#end
+struct Object
+    geometry::Geometry
+    material::Material # TODO: Create material structure
+end
 
 struct Scene
-    items::Set{Geometry} # TODO: replace Geometry struct with Object struct
+    items::Set{Object} # TODO: replace Geometry struct with Object struct
 end

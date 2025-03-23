@@ -152,7 +152,7 @@ function ∪(object₁::Geometry, object₂::Geometry)
     return Scene(Set([object₁, object₂]))    
 end
 
-function ⋃(args::Vararg{Geometry})
+function ⋃(args::Vararg{Object})
     return Scene(Set(args))
 end
 
@@ -166,7 +166,7 @@ function ∩(ray::Ray, scene::Scene)
     closestIntersectionPoint = ∅
     distanceToClosestIntersection = ∞
     for object in scene.items
-        intersectionPoint = ray ∩ object
+        intersectionPoint = ray ∩ object.geometry
         if intersectionPoint ≠ ∅
             distanceFromOrigin = norm( ray.origin → intersectionPoint )
             if distanceFromOrigin < distanceToClosestIntersection
