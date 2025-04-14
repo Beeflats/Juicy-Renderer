@@ -29,7 +29,32 @@ struct Sphere <: Geometry
     radius
 end
 
+struct Paraboloid <: Geometry
+    """
+    A paraboloid has a focus f and a foot C. It is the set of points
+        P(f, C) = { x ∈ ℝ³ | (f → x) ⋅ (f → x) = ((C → x) ⋅ N)² }
+        where N = unit(C → f)
+    """
+    focus::PointVector
+    foot::PointVector
+    discRadius
+end
+
 # TODO: create more geometries e.g. triangles, quadrilaterals, toruses
+
+function getNormal(p::PointVector, S::Sphere)
+    return S.center →ᵘ p
+end
+
+function getNormal(p::PointVector, Π::Plane)
+    return unit(Π.normal)
+end
+
+function getNormal(p::PointVector, P::Paraboloid)
+    pf = p →ᵘ P.focus
+    n̂ = P.foot →ᵘ P.focus
+    return unit(pf + n̂)
+end
 
 struct Object
     geometry::Geometry
