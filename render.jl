@@ -9,7 +9,7 @@ function traceRay(ray::Ray, 𝕊::Scene, lightsource::PointVector, depth::Int64 
     end
     
     normal = getNormal(intersectionPoint, object.geometry)
-    return [normal.x, normal.y, normal.z] 
+    #return [normal.x, normal.y, normal.z] 
 
     objectColor = object.material.baseColor
     α = object.material.roughness
