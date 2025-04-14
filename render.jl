@@ -2,10 +2,10 @@ using Images, ImageView
 include("Camera.jl")
 include("geometryOperations.jl")
 
-function traceRay(ray::Ray, 𝕊::Scene, lightsource::PointVector, depth::Int64 = 6)
+function traceRay(ray::Ray, 𝕊::Scene, lightsource::DirectionVector, depth::Int64)
     object, intersectionPoint = ray ∩ 𝕊
     if isnothing(object) || depth < 0
-        return [0,0,0]#[0.8, 0.8, 1]
+        return [0.8, 0.8, 1]
     end
     
     normal = getNormal(intersectionPoint, object.geometry)
@@ -15,11 +15,12 @@ function traceRay(ray::Ray, 𝕊::Scene, lightsource::PointVector, depth::Int64 
     α = object.material.roughness
     γ = object.material.metallic
     
+    # TODO: Interact with light from lightsource
     emittedColor = object.material.emissionColor * object.material.emissionIntensity
     reflectedRay = reflection(ray, normal, intersectionPoint)
-    reflectedColor = traceRay(reflectedRay, 𝕊, lightsource::PointVector, depth - 1) .* objectColor
+    reflectedColor = traceRay(reflectedRay, 𝕊, lightsource, depth - 1) .* objectColor
     scatteredRay = scatter(ray, normal, intersectionPoint)
-    diffuseColor = traceRay(scatteredRay, 𝕊, lightsource::PointVector, depth - 1) .* objectColor
+    diffuseColor = traceRay(scatteredRay, 𝕊, lightsource, depth - 1) .* objectColor
 
     # Raytraced color
     rayTracedColor = emittedColor + α * diffuseColor + (1 - α) * reflectedColor
@@ -52,7 +53,7 @@ function render(camera::Camera, 𝕊::Scene, lightsource, numSamples, depth = 2,
             else
                 ray = Ray(camera.position, shiftedCenter →ᵘ camera.position)
             end
-            pixelColor += traceRay(ray, 𝕊, depth)
+            pixelColor += traceRay(ray, 𝕊, lightsource, depth)
         end
         image[:, i, j] = pixelColor / numSamples 
 
