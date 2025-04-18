@@ -52,3 +52,22 @@ function refraction(ray::Ray, normal::DirectionVector, pointOfIntersection::Poin
     d_refracted = c₁ * (d_incident ⟂ normal) +  c₂ * (d_incident ∥ normal)
     return Ray(pointOfIntersection, d_refracted)
 end
+
+function uniformSampleSphere()
+    """
+    Samples a random unit vector (sphere) in 3D space
+    """
+    return unit(DirectionVector(randn(), randn(), randn()))
+end
+
+function scatter(ray::Ray, normal::DirectionVector, pointOfIntersection::PointVector)
+    """
+    Scattered reflection of a ray by uniform sampling of a unit vector from a hemisphere
+    """
+    d_incident = ray.direction
+    orientedNormal = -(d_incident ∥ normal)
+    randomDirection = uniformSampleSphere()
+    scatteredDirection = randomDirection * sign(orientedNormal ⋅ randomDirection) # orient the random unit vector to be acute with the oriented normal
+    # TODO: It is very unlikely that randomDirection is exactly perpendicular to the normal vector but resampling is necessarily if it is.
+    return Ray(pointOfIntersection, scatteredDirection)
+end

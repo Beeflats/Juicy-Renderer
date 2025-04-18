@@ -37,6 +37,15 @@ function ∈(p::PointVector, Π::Plane)
     end
 end
 
+function ∈(p::PointVector, P::Paraboloid)
+    ε = 0.0001 # tolerance
+    f = P.focus
+    C = P.foot
+    r = P.discRadius
+    # we want to verify length²(C → q) ≤ r² 
+    return abs(length²(f → p) - length²((C → p) ∥ unit(C → f))) < ε && length²(C → p) - length²(f → p) ≤ r*r
+end
+
 function ⊂(p::PointVector, r::Ray)
     return ∈(p, r)
 end
@@ -65,7 +74,7 @@ function ∩(r::Ray, Π::Plane)
     Let θ = n∠(P→O) and let ϕ = n∠d
     """
     if r ⊂ Π # ray is contained on the plane
-        return r
+        return r.origin # TODO: this may cause a bug
     else
         O = r.origin
         OP = O → Π.point
@@ -115,6 +124,38 @@ function ∩(S::Sphere, ray::Ray)
     return ∩(ray, S)
 end
 
+function ∩(ray::Ray, P::Paraboloid)
+    o = ray.origin
+    d = ray.direction
+    f = P.focus
+    C = P.foot
+    n̂ = unit(C → f)
+
+    a = (d ⋅ d)^2 - (d ⋅ n̂)^2
+    b = ((f → o) ⋅ d) - ((C → o) ⋅ n̂) * (d ⋅ n̂)
+    c = length²(f → o) - ((C → o) ⋅ n̂)^2
+    Δ = b^2 - a*c
+
+    if Δ < 0
+        return nothing
+    else
+        sqrtΔ = √(Δ)
+        t₁ = (-b - sqrtΔ) / a
+        t₂ = (-b + sqrtΔ) / a
+        if t₁ ≥ 0 && at(ray, t₁) ∈ P
+            return at(ray, t₁)
+        elseif t₂ ≥ 0 && at(ray, t₂) ∈ P
+            return at(ray, t₂)
+        else
+            return nothing
+        end        
+    end
+end
+
+function ∩(P::Paraboloid, ray::Ray)
+    return ∩(ray, P)
+end
+
 function ∩(Π₁::Plane, Π₂::Plane)
     """
     The intersection of two planes is a line (bidirectional ray).
@@ -144,15 +185,8 @@ function ∪(scene₁::Scene, scene₂::Scene)
     return Scene(union(scene₁.items, scene₂.items))
 end
 
-function ∪(scene::Scene, object::Geometry)
-    return union(scene.items, object)
-end
 
-function ∪(object₁::Geometry, object₂::Geometry)
-    return Scene(Set([object₁, object₂]))    
-end
-
-function ⋃(args::Vararg{Geometry})
+function ⋃(args::Vararg{Object})
     return Scene(Set(args))
 end
 
@@ -166,7 +200,7 @@ function ∩(ray::Ray, scene::Scene)
     closestIntersectionPoint = ∅
     distanceToClosestIntersection = ∞
     for object in scene.items
-        intersectionPoint = ray ∩ object
+        intersectionPoint = ray ∩ object.geometry
         if intersectionPoint ≠ ∅
             distanceFromOrigin = norm( ray.origin → intersectionPoint )
             if distanceFromOrigin < distanceToClosestIntersection
