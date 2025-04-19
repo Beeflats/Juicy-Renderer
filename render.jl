@@ -24,7 +24,9 @@ function traceRay(ray::Ray, 𝕊::Scene, lightsource::DirectionVector, depth::In
 
     # Raytraced color
     rayTracedColor = emittedColor + α * diffuseColor + (1 - α) * reflectedColor
-    return rayTracedColor
+    g_θ = object.style.stylizationFunction
+    intersectionData = IntersectionData(intersectionPoint, normal, ray, reflectedRay, scatteredRay)
+    return g_θ(rayTracedColor, intersectionData)
 end
 
 function uniformSample(a,b)
@@ -58,9 +60,9 @@ function render(camera::Camera, 𝕊::Scene, lightsource, numSamples, depth = 2,
         image[:, i, j] = pixelColor / numSamples 
 
         # Buffer
-        #if j + i * imageHeight % 500 == 1
-        #    println((j + i * imageHeight)/(imageHeight*imageWidth) * 100)
-        #end
+        if j + i * imageHeight % 500 == 1
+            println((j + i * imageHeight)/(imageHeight*imageWidth) * 100)
+        end
     end
 
     println("render complete")
