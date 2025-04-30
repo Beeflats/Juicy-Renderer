@@ -1,27 +1,66 @@
 using Images, ImageView
 include("render.jl")
 
-# Set up the scene
-camera = makeCamera(PointVector(0,0,0), ĵ, 16/9, 500)
+# Camera
+lightIntensity = 5
+lightColor = [1,1,1]
+lightMaterial = genericEmissiveMaterial(lightColor, lightIntensity)
+ceilingHeight = HZ = 0.554
+leftColor = [0.122, 0.608, 0.145]
+rightColor = [0.651, 0.051, 0.051]
+roomColor = [0.729, 0.729, 0.729]
+floor_z = 0
+function roomMaterial(baseColor)
+    return Material(baseColor, 1, 0, 0, [0,0,0])
+end
+ID = STYLE_identity
 
-light = Object(Sphere(PointVector(0,0.6,0.27), 0.2), genericEmissiveMaterial([1,1,0.8],2), STYLE_identity)
-floor = Object(Plane(PointVector(0,0,-0.1), k̂), MATERIAL_whitePaint, STYLE_depthMap)
-ceiling = Object(Plane(PointVector(0,0,0.1), k̂), MATERIAL_whitePaint, STYLE_normalMap)
-leftwall = Object(Plane(PointVector(-0.14,0,0), î), Material([0,0.9,0],0.98,0.1,0,[0,0,0]), STYLE_identity)
-rightwall = Object(Plane(PointVector(0.14,0,0), î), Material([0.9,0,0],0.98,0.1,0,[0,0,0]), STYLE_depthMap)
-backwall = Object(Plane(PointVector(0,0.9,0), ĵ), MATERIAL_whitePaint, STYLE_depthMap)
-frontwall = Object(Plane(PointVector(0,-0.1,0), ĵ), genericEmissiveMaterial([1,1,0.8], 0.5), STYLE_identity)
+# Camera
+camera = makeCamera(PointVector(0,0,HZ/2), ĵ, 9/9, 500)
 
-STYLE_MonochromeEdge = STYLE_edgeLines(0.2, [0,0,0]) ∘ STYLE_fill([1,1,1])
+# Cornell box
+floor = Object(GROUNDPLANE, roomMaterial(roomColor), ID)
+ceiling = Object(Plane(PointVector(0,0,HZ), k̂), roomMaterial(roomColor), ID)
+backWall = Object(Plane(PointVector(0,2.5HZ,0), ĵ), roomMaterial(roomColor), ID)
+leftWall = Object(Plane(PointVector(-HZ/2,0,0), î), roomMaterial(leftColor), ID)
+rightWall = Object(Plane(PointVector(HZ/2,0,0), î), roomMaterial(rightColor), ID)
 
-ball1 = Object(Sphere(PointVector(0,0.6,-0.1+0.02), 0.02), MATERIAL_toyPlastic, STYLE_MonochromeEdge)
-ball2 = Object(Sphere(PointVector(-0.07,0.5,-0.1+0.03), 0.03), MATERIAL_coatedMetalPaint, STYLE_identity)
-ball3 = Object(Sphere(PointVector(0.08,0.6,-0.1+0.04), 0.04), MATERIAL_aluminum, STYLE_invert)
+# Light
+light1 = Object(Triangle(PointVector(- HZ/4, 1.8HZ - HZ/4, 0.999HZ), PointVector(- HZ/4, 1.8HZ + HZ/4, 0.999HZ), PointVector(+ HZ/4, 1.8HZ - HZ/4, 0.999HZ)), lightMaterial, STYLE_identity)
+light2 = Object(Triangle(PointVector(+ HZ/4, 1.8HZ + HZ/4, 0.999HZ), PointVector(- HZ/4, 1.8HZ + HZ/4, 0.999HZ), PointVector(+ HZ/4, 1.8HZ - HZ/4, 0.999HZ)), lightMaterial, STYLE_identity)
+light = ⋃(light1, light2)
 
-𝕊 = ⋃(light, floor, ceiling, leftwall, rightwall, frontwall, backwall, ball1, ball2 ,ball3)
+ball = Object(Sphere(PointVector(-0.17, 2HZ, HZ/6), HZ/6), MATERIAL_perfectMirror, ID)
+
+prismCap_z = HZ/3
+corners = [[0.0,1],[0.133,1.2],[0.11,0.8],[0.24,0.98]]
+p1 = PointVector(corners[1][1],corners[1][2],0); p2 = PointVector(corners[2][1],corners[2][2],0); p3 = PointVector(corners[3][1],corners[3][2],0) ; p4 = PointVector(corners[4][1],corners[4][2],0);
+p5 = PointVector(corners[1][1],corners[1][2],prismCap_z); 
+p6 = PointVector(corners[2][1],corners[2][2],prismCap_z); 
+p7 = PointVector(corners[3][1],corners[3][2],prismCap_z); 
+p8 = PointVector(corners[4][1],corners[4][2],prismCap_z);
+prismMat = MATERIAL_perfectMirror
+prismStyle = STYLE_identity
+
+prismFace1 = ⋃(Object(Triangle(p1,p3,p7),prismMat, prismStyle), Object(Triangle(p7,p5,p1),prismMat, prismStyle))
+prismFace2 = ⋃(Object(Triangle(p2,p1,p5),prismMat, prismStyle), Object(Triangle(p5,p6,p2),prismMat, prismStyle))
+prismFace3 = ⋃(Object(Triangle(p2,p4,p8),prismMat, prismStyle), Object(Triangle(p8,p6,p2),prismMat, prismStyle))
+prismFace4 = ⋃(Object(Triangle(p3,p4,p8),prismMat, prismStyle), Object(Triangle(p8,p7,p3),prismMat, prismStyle))
+prismCap = ⋃(Object(Triangle(p5,p6,p8),prismMat, prismStyle), Object(Triangle(p8,p7,p5),prismMat, prismStyle))
+prism = prismFace1 ∪ prismFace2 ∪ prismFace3 ∪ prismFace4 ∪ prismCap
+
+ball1 = Object(Sphere(p1, 0.02), genericMaterial([0,1,0],0,0), ID)
+ball2 = Object(Sphere(p2, 0.02), genericMaterial([1,0,0],0,0), ID)
+ball3 = Object(Sphere(p3, 0.02), genericMaterial([0,0,1],0,0), ID)
+ball4 = Object(Sphere(p4, 0.02), genericMaterial([1,1,0],0,0), ID)
+balls = ⋃(ball1,ball2,ball3,ball4)
+
+props = ⋃(ball) ∪ prism #∪ balls
+
+𝕊 = ⋃(floor, ceiling, backWall, leftWall, rightWall) ∪ light ∪ props
 
 lightsource = DirectionVector(1,1,1)
 
 # Render the scene
-image = render(camera, 𝕊, lightsource, 1, 2)
+image = render(camera, 𝕊, lightsource, 5, 3)
 colorview(RGB, image)

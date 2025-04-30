@@ -10,6 +10,10 @@ struct IntersectionData
     scatteredRay::Ray
 end
 
+function getIntensity(color)
+    return 0.299 * color[1] + 0.587 * color[2] + 0.114 * color[3]
+end
+
 # Addition
 function Base.:+(θ₁::Style, θ₂::Style)
     g_θ₁ = θ₁.stylizationFunction
@@ -85,6 +89,11 @@ function g_invert(color, intersectionData::IntersectionData)
 end
 STYLE_invert = Style(g_invert)
 
+function g_greyscale(color, intersectionData::IntersectionData)
+    return getIntensity(color) * [1, 1, 1]
+end
+STYLE_greyscale = Style(g_greyscale)
+
 function g_normalMap(color, intersectionData::IntersectionData)
     normal = intersectionData.normal
     extractedColor = [normal.x, normal.y, normal.z]
@@ -109,7 +118,7 @@ STYLE_fill(fill_color) = Style(make_g_fill(fill_color))
 function make_g_edgeLines(tolerance, edgeColor)
     function g_edgeLines(color, intersectionData::IntersectionData)
         θᵢ = ∠(intersectionData.normal, intersectionData.incidentRay.direction) # incidentAngle
-        if π/2 - tolerance ≤ θᵢ ≤ π/2 + tolerance
+        if π/2 - tolerance ≤ θᵢ ≤ π/2 + tolerance || color == edgeColor
             return edgeColor
         else
             return color
@@ -118,6 +127,18 @@ function make_g_edgeLines(tolerance, edgeColor)
     return g_edgeLines
 end
 STYLE_edgeLines(tolerance = 0.1, edgeColor = [0, 0, 0]) = Style(make_g_edgeLines(tolerance, edgeColor))
+
+function make_g_stripes(delta_z, stripeColors)
+    numColors = length(stripeColors)
+    function g_stripes(color, intersectionData::IntersectionData)
+        height = intersectionData.intersectionPoint.z
+        colorIndex = mod1(Int(ceil(height/delta_z)),numColors)
+        stripeColor = stripeColors[colorIndex]
+        return stripeColor
+    end
+    return g_stripes
+end
+STYLE_stripes(delta_z, stripeColors) = Style(make_g_stripes(delta_z, stripeColors))
 
 function make_g_hueShift(k_cool, k_warm)
     function g_hueShift(color, intersectionData::IntersectionData)
@@ -128,6 +149,22 @@ function make_g_hueShift(k_cool, k_warm)
     return g_hueShift
 end
 STYLE_hueShift(k_cool, k_warm) = Style(make_g_hueShift(k_cool, k_warm))
+
+function make_g_toonShade(intensityIntervals, toonColors)
+    # if toonColors has n colors, then intensityIntervals must have n-1 numbers
+    function g_toonShade(color, intersectionData::IntersectionData)
+        intensity = getIntensity(color)
+        for colorIndex ∈ eachindex(intensityIntervals)
+            if intensity < intensityIntervals[colorIndex]
+                return toonColors[colorIndex]
+            end
+        end
+        return toonColors[end]
+    end
+    return g_toonShade
+end
+STYLE_toonShade(intensityIntervals ,toonColors) = Style(make_g_toonShade(intensityIntervals ,toonColors))
+
 
 
 """ 
