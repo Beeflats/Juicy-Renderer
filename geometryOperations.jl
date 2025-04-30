@@ -143,17 +143,44 @@ function ∩(ray::Ray, P::Paraboloid)
         t₁ = (-b - sqrtΔ) / a
         t₂ = (-b + sqrtΔ) / a
         if t₁ ≥ 0 && at(ray, t₁) ∈ P
-            return at(ray, t₁)
+            t = t₁
         elseif t₂ ≥ 0 && at(ray, t₂) ∈ P
-            return at(ray, t₂)
+            t = t₂
         else
             return nothing
-        end        
+        end
     end
+    return at(ray, t)
 end
 
 function ∩(P::Paraboloid, ray::Ray)
     return ∩(ray, P)
+end
+
+function ∩(ray::Ray, T::Triangle)
+    """
+    Let o be the origin of the ray and d be its direction
+    let v₁, v₂, v₃ be vectors connecting the origin of the ray to the vertices of the triangle.
+    The point x = displace(o, λ₁v₁ + λ₂v₂ + λ₃v₃ ) is in the triangle 
+        if λ₁+λ₂+λ₃ = 1 and λ₁,λ₂,λ₃∈[0,1]
+    To determine when the ray intersects with the triangle, we need to solve for t
+        λ₁v₁ + λ₂v₂ + λ₃v₃ = td
+    such that displace(o, td) is in the triangle.
+    """
+    o = ray.origin
+    Λ = RREF(o → T.p₁, o → T.p₂, o → T.p₃, ray.direction)
+    if Λ == nothing # TODO: The  
+        return nothing
+    elseif all(x -> x ≥ 0, Λ) # all the coefficients of o→pᵢ must be non-negative for the ray to intersect the triangle
+        t = 1/sum(Λ)
+    else
+        return nothing
+    end
+    return at(ray, t)
+end
+
+function ∩(T::Triangle, ray::Ray)
+    return ∩(ray, T)
 end
 
 function ∩(Π₁::Plane, Π₂::Plane)

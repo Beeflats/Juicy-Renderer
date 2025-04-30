@@ -41,6 +41,15 @@ struct Paraboloid <: Geometry
     discRadius
 end
 
+struct Triangle <: Geometry
+    """
+    The convex hull of three points in ℝ³
+    """
+    p₁::PointVector
+    p₂::PointVector
+    p₃::PointVector
+end
+
 # TODO: create more geometries e.g. triangles, quadrilaterals, toruses
 
 function getNormal(p::PointVector, S::Sphere)
@@ -55,6 +64,10 @@ function getNormal(p::PointVector, P::Paraboloid)
     pf = p →ᵘ P.focus
     n̂ = P.foot →ᵘ P.focus
     return unit(pf + n̂)
+end
+
+function getNormal(p::PointVector, T::Triangle)
+    return unit((T.p₁ → T.p₂) × (T.p₁ → T.p₃))
 end
 
 struct Object

@@ -108,6 +108,25 @@ function →ᵘ(P::PointVector, Q::PointVector)
 end
 
 """
+Solving systems of DirectionVector equations
+"""
+
+using LinearAlgebra
+function RREF(v₁::DirectionVector, v₂::DirectionVector, v₃::DirectionVector, u::DirectionVector)
+	"""
+	Find the coefficients λ₁,λ₂,λ₃ that satisfy the equation
+		λ₁v₁+λ₂v₂+λ₃v₃ = u
+	"""
+    V = [v₁.x v₂.x v₃.x;
+         v₁.y v₂.y v₃.y;
+         v₁.z v₂.z v₃.z]
+    if rank(V) < 3
+        return nothing
+    end
+    return V \ [u.x; u.y; u.z]
+end
+
+"""
 Matrices for linear transforms of direction vectors
 """
 
@@ -127,3 +146,4 @@ function transformation_rotateAroundAxis(axis::DirectionVector, θ)
 		 u.z*u.x*(1-cos(θ))-u.y*sin(θ) u.z*u.y*(1-cos(θ))+u.x*sin(θ) u.z*u.z*(1-cos(θ))+cos(θ)]
 	return R
 end
+
