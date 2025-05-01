@@ -1,6 +1,6 @@
-# StylisedRendering
+# Juicy Renderer
 
-A physically based stylised non-photorealistic renderer programmed with Julia. Based on a [2024 SIGGRAPH paper](http://cv.rexwe.st/pdf/srfoe.pdf). A function of expectation is used to produce stylizations like the renderings below.  
+A physically based non-photorealistic renderer programmed with Julia. Based on a [2024 SIGGRAPH paper](http://cv.rexwe.st/pdf/srfoe.pdf). A function of expectation is used to produce stylizations like the renderings below.  
 
 ![non-stylized render](images/sample1.png)
 ![stylized render](images/sample2.png)
@@ -70,6 +70,7 @@ To use the composition operator ∘, just type `\circ + TAB` in Julia.
 
 ### Missing features
 - Transparent materials, refraction and dispersion
+- Subsurface scattering
 - Variance reduction
 - Acceleration structures
 - More stylization parameters e.g. path prefix, time, camera settings, previous frames' data, speed and acceleration
