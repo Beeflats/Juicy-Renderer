@@ -199,9 +199,5 @@ Nonphotorealistic Rendering by Q-mapping.
 Computer Graphics Forum (1999). 
 https://doi.org/10.1111/1467-8659.00300
 
-
-
-
-
 """
  

@@ -17,6 +17,7 @@ struct Material
     emissionColor
 end
 
+# material library
 function genericMaterial(color, roughness, metallic) # non-emissive
     return Material(color, roughness, metallic, 0, [1, 1, 1])
 end

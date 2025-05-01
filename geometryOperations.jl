@@ -84,7 +84,7 @@ function ∩(r::Ray, Π::Plane)
         if t > 0
             return at(r, t) # equivalent to displace(O, norm(OP) * cos(θ) / cos(ϕ) * unit(d))
         else # if the ray is pointing away from the plane
-            return nothing
+            return ∅
         end
     end
 end
@@ -106,13 +106,13 @@ function ∩(ray::Ray, S::Sphere)
     r = S.radius
     Δ = (OC ⋅ d)^2 - length²(d) * (length²(OC) - r^2) # the determinant is Δ = norm(OC)²*norm(d)² * (cos²(θ) - cos²(ϕ))
     if Δ < 0 # if the ray's direction is not contained the cone whose vertex is O and tangent to S; along the lines of "if θ > ϕ"
-        return nothing
+        return ∅
     else
         t₁ = ( OC ⋅ d - √(Δ) ) / length²(d) # norm(OC)/norm(d) * (cos(θ) - √[cos²(θ) - cos²(ϕ)])
         t₂ = ( OC ⋅ d - √(Δ) ) / length²(d) # norm(OC)/norm(d) * (cos(θ) + √[cos²(θ) - cos²(ϕ)])
         # note that t₁ == t₂ when θ == ϕ meaning only one solution exists if the ray is tangent to the sphere
         if t₁ ≤ 0 && t₂ ≤ 0
-            return nothing
+            return ∅
         else
             t = t₁ > 0 ? t₁ : t₂ # set t to be the smaller non-negative value between t₁ and t₂
             return at(ray, t) # equivalent to displace(O, norm(OC)*(cos(θ) ± √[cos²(θ) - cos²(ϕ)]) * unit(d))
@@ -137,7 +137,7 @@ function ∩(ray::Ray, P::Paraboloid)
     Δ = b^2 - a*c
 
     if Δ < 0
-        return nothing
+        return ∅
     else
         sqrtΔ = √(Δ)
         t₁ = (-b - sqrtΔ) / a
@@ -147,7 +147,7 @@ function ∩(ray::Ray, P::Paraboloid)
         elseif t₂ ≥ 0 && at(ray, t₂) ∈ P
             t = t₂
         else
-            return nothing
+            return ∅
         end
     end
     return at(ray, t)
@@ -169,12 +169,12 @@ function ∩(ray::Ray, T::Triangle)
     """
     o = ray.origin
     Λ = RREF(o → T.p₁, o → T.p₂, o → T.p₃, ray.direction)
-    if Λ == nothing # TODO: The  
-        return nothing
+    if Λ == nothing # TODO: How to deal with a ray whose intersection with the ray is a line segment rather than a single point? 
+        return ∅
     elseif all(x -> x ≥ 0, Λ) # all the coefficients of o→pᵢ must be non-negative for the ray to intersect the triangle
         t = 1/sum(Λ)
     else
-        return nothing
+        return ∅
     end
     return at(ray, t)
 end
@@ -196,25 +196,36 @@ function ∩(Π₁::Plane, Π₂::Plane)
     n₂ = unit(Π₂.normal)
     d = Π₁.normal × Π₂.normal # direction of intersecting line
     if length²(d) == 0
-        return nothing
+        return ∅
     else
         p₁ = Π₁.point
         p₂ = Π₂.point
-        m = displace(p₁, (p₁→p₂)/2) # midpoint of p₁ and p₂
+        m = p₁ ⊕ ((p₁→p₂)/2) # midpoint of p₁ and p₂
         n̄ = (n₁ + n₂) / 2 # a vector that bisects n₁ and n₂
         c = -(p₁→m)⋅n₁ / (n₁⋅n̄) # equivalent to -norm(p₁→p₂) * tan((n₁∠n₂) / 2) / norm(n̄)
-        p = displace(m, c*n̄)
+        p = m ⊕ (c*n̄)
         return Ray(p, d)
     end
 end
 
-function ∪(scene₁::Scene, scene₂::Scene)
-    return Scene(union(scene₁.items, scene₂.items))
-end
-
-
 function ⋃(args::Vararg{Object})
     return Scene(Set(args))
+end
+
+function ∪(object₁::Object, object₂::Object)
+    return Scene(Set([object₁, object₂]))
+end
+
+function ∪(object::Object, scene::Scene)
+    return Scene(union(scene.items, Set([object])))
+end
+
+function ∪(scene::Scene, object::Object)
+    return ∪(object::Object, scene::Scene)
+end
+
+function ∪(scene₁::Scene, scene₂::Scene)
+    return Scene(union(scene₁.items, scene₂.items))
 end
 
 function ∩(ray::Ray, scene::Scene)

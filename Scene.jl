@@ -50,7 +50,7 @@ struct Triangle <: Geometry
     p₃::PointVector
 end
 
-# TODO: create more geometries e.g. triangles, quadrilaterals, toruses
+# TODO: create more geometries e.g. toruses, meshes
 
 function getNormal(p::PointVector, S::Sphere)
     return S.center →ᵘ p

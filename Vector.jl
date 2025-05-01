@@ -95,8 +95,8 @@ end
 function displace(P::PointVector, v::DirectionVector)
 	return PointVector(P.x+v.x, P.y+v.y, P.z+v.z)
 end
-function displace(v::DirectionVector, P::PointVector)
-	return PointVector(P.x+v.x, P.y+v.y, P.z+v.z)
+function ⊕(P::PointVector, v::DirectionVector)
+	return displace(P,v)
 end
 # Direction vector pointing from P to Q
 function →(P::PointVector, Q::PointVector)

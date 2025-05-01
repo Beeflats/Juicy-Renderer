@@ -45,11 +45,11 @@ function discretizePlaneSensor(continuousSensor::PlaneSensor, roll, aspectRatio,
 
     # Make the map of sensor sensorPositions
     sensorsPositions = Array{PointVector}(undef, imageHeight, imageWidth) # Initialise the map with arbitrary positions
-    upperLeftSensorPosition = displace(displace(sensorCenter, wholeWidth * horizontalBasis / 2 - sensorWidth * horizontalBasis / 2), - wholeHeight * verticalBasis / 2 + sensorHeight * verticalBasis / 2)
+    upperLeftSensorPosition = ( sensorCenter ⊕ (wholeWidth * horizontalBasis / 2 - sensorWidth * horizontalBasis / 2) ) ⊕ (- wholeHeight * verticalBasis / 2 + sensorHeight * verticalBasis / 2)
     for i ∈ 1:imageHeight, j ∈ 1:imageWidth
         displaceRight = - (j-1) * sensorWidth * horizontalBasis
         displaceDown = (i-1) * sensorHeight * verticalBasis
-        sensorPosition = displace(displace(upperLeftSensorPosition, displaceRight), displaceDown)
+        sensorPosition = (upperLeftSensorPosition ⊕ displaceRight) ⊕ displaceDown
         sensorsPositions[i,j] = sensorPosition
     end
 
@@ -75,7 +75,7 @@ function makeCamera(position::PointVector,
                     focalLength = 0.050, # distance of sensor behind camera (meters); wide-angle ranges 10mm to 35mm, standard lenses are 50mm and telephoto lenses are 70mm to 300mm or more 
                     roll = 0 # anticlockwise rotation (radians); dutch angle
                     ) 
-    sensorCenter = displace(position, -focalLength * unit(viewingDirection))
+    sensorCenter = position ⊕ -(focalLength * unit(viewingDirection))
     continuousSensor = PlaneSensor(sensorCenter, viewingDirection)
     sensor = discretizePlaneSensor(continuousSensor, roll, aspectRatio, wholeWidth, imageWidth)
     Camera(position, viewingDirection, focalLength, sensor)
