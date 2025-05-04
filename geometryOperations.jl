@@ -228,6 +228,14 @@ function ∪(scene₁::Scene, scene₂::Scene)
     return Scene(union(scene₁.items, scene₂.items))
 end
 
+function Mesh(triangles::Vector{Triangle}, meshMaterial::Material, meshStyle::Style)
+    mesh = ⋃()
+    for triangle ∈ triangles
+        mesh = mesh ∪ Object(triangle, meshMaterial, meshStyle)
+    end
+    return mesh
+end
+
 function ∩(ray::Ray, scene::Scene)
     """
     Let 𝕊 be Scene.items and let r(t) = at(ray, t)
